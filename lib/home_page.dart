@@ -8,43 +8,71 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String name = "";
-
+  int count = 0;
   TextEditingController nameController = TextEditingController();
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     getName();
   }
 
-  void getName() async{
+  void getName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     name = prefs.getString("name") ?? "";
-    setState(() {
-
-    });
+    count = prefs.getInt("count") ?? 0;
+    count++;
+    prefs.setInt("count", count);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    Color bgColor = Colors.white;
+    if(count%3==0 && count%5==0){
+      bgColor = Colors.orange;
+    } else if(count%5==0){
+      bgColor = Colors.blue;
+    } else if(count%3==0){
+      bgColor = Colors.green;
+    }
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(title: Text('Home')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            name.isNotEmpty ? Text("Welcome, $name") : Container(),
-            TextField(
-              controller: nameController,
+      body: Stack(
+        children: [
+          Center(
+            child: Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 300,
+                fontWeight: FontWeight.bold,
+                color: Colors.black26,
+              ),
             ),
-            ElevatedButton(onPressed: () async {
-              String userName = nameController.text;
-              ///store data
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.setString("name", userName);
-            }, child: Text('Save')),
-          ],
-        ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                name.isNotEmpty ? Text("Welcome, $name") : Container(),
+                TextField(controller: nameController),
+                ElevatedButton(
+                  onPressed: () async {
+                    String userName = nameController.text;
+
+                    ///store data
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.setString("name", userName);
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
